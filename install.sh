@@ -224,45 +224,43 @@ execute_module() {
     
     CURRENT_MODULE=$((CURRENT_MODULE + 1))
     
-    echo -e "\n${BOLD}${MAGENTA}--- Module ${CURRENT_MODULE}/${TOTAL_MODULES}: ${module_name} ---${NC}\n"
+    echo -e "\n${BOLD}${MAGENTA}--- $MSG_MODULE ${CURRENT_MODULE}/${TOTAL_MODULES}: ${module_name} ---${NC}\n"
     
     progress_bar $CURRENT_MODULE $TOTAL_MODULES
     
     if [[ ! -f "$setup_script" ]]; then
-        print_error "Setup script not found: $setup_script"
+        print_error "$MSG_SETUP_NOT_FOUND $setup_script"
         FAILED_MODULES+=("$module_name")
         return 1
     fi
     
     chmod +x "$setup_script"
     
-    if (cd "$module_path" && bash setup.sh); then
-        print_success "Module '${module_name}' completed successfully"
+    if (cd "$module_path" && DOTFILES_LANG="$DOTFILES_LANG" bash setup.sh); then
+        print_success "$MSG_MODULE '${module_name}' $MSG_COMPLETED"
         return 0
     else
-        print_error "Module '${module_name}' failed!"
+        print_error "$MSG_MODULE '${module_name}' $MSG_FAILED"
         FAILED_MODULES+=("$module_name")
         return 1
     fi
 }
 
 apply_stow() {
-    print_section "Applying GNU Stow"
+    print_section "$MSG_STOW"
     
-    # Stow all modules that have config directories
     for module_dir in "${MODULES_DIR}"/*; do
         if [[ -d "$module_dir" ]]; then
             local module_name=$(basename "$module_dir")
             
-            # Check if module has .config directory
-            if [[ -d "${module_dir}/.config" ]]; then
-                print_info "Stowing ${module_name}..."
+            if [[ -d "${module_dir}/.config" ]] || [[ -f "${module_dir}/.zshrc" ]] || [[ -f "${module_dir}/.gitconfig" ]]; then
+                print_info "$MSG_STOWING ${module_name}..."
                 
                 cd "${MODULES_DIR}"
                 if stow -v -t "$HOME" "$module_name" 2>&1 | grep -v "BUG in find_stowed_path" || true; then
-                    print_success "${module_name} symlinked"
+                    print_success "${module_name} $MSG_SYMLINKED"
                 else
-                    print_warning "${module_name} may have conflicts"
+                    print_warning "${module_name} $MSG_CONFLICTS"
                 fi
             fi
         fi
@@ -272,28 +270,28 @@ apply_stow() {
 }
 
 print_summary() {
-    print_section "Installation Summary"
+    print_section "$MSG_SUMMARY"
     
     local successful=$((TOTAL_MODULES - ${#FAILED_MODULES[@]}))
     
-    echo -e "${BOLD}Modules Processed:${NC} ${TOTAL_MODULES}"
-    echo -e "${GREEN}${BOLD}Successful:${NC} ${successful}"
-    echo -e "${RED}${BOLD}Failed:${NC} ${#FAILED_MODULES[@]}"
+    echo -e "${BOLD}$MSG_PROCESSED${NC} ${TOTAL_MODULES}"
+    echo -e "${GREEN}${BOLD}$MSG_SUCCESSFUL${NC} ${successful}"
+    echo -e "${RED}${BOLD}$MSG_FAILED_LIST${NC} ${#FAILED_MODULES[@]}"
     
     if [[ ${#FAILED_MODULES[@]} -gt 0 ]]; then
-        echo -e "\n${RED}${BOLD}Failed Modules:${NC}"
+        echo -e "\n${RED}${BOLD}$MSG_FAILED_MODULES${NC}"
         for module in "${FAILED_MODULES[@]}"; do
             echo -e "  ${RED}[FAILED]${NC} ${module}"
         done
-        echo -e "\n${YELLOW}Please check the error messages above and retry.${NC}"
+        echo -e "\n${YELLOW}$MSG_CHECK_ERRORS${NC}"
         return 1
     else
-        echo -e "\n${GREEN}${BOLD}All modules installed successfully!${NC}\n"
+        echo -e "\n${GREEN}${BOLD}$MSG_ALL_SUCCESS${NC}\n"
         
-        print_info "You may need to:"
-        echo -e "  - Reboot to apply Secure Boot changes"
-        echo -e "  - Re-login to apply shell/KDE settings"
-        echo -e "  - Run ${BOLD}plasma-apply-*${NC} commands manually if needed"
+        print_info "$MSG_NEED_TO"
+        echo -e "  - $MSG_REBOOT"
+        echo -e "  - $MSG_RELOGIN"
+        echo -e "  - $MSG_PLASMA"
         return 0
     fi
 }
@@ -306,28 +304,30 @@ main() {
     check_root
     check_dependencies
     
-    # Discover and store modules
     mapfile -t MODULES_TO_INSTALL < <(discover_modules)
     
-    # Confirm with user
-    echo -e "${YELLOW}${BOLD}Ready to install ${TOTAL_MODULES} module(s).${NC}"
-    read -p "Continue? [Y/n] " -n 1 -r
+    echo -e "${YELLOW}${BOLD}$MSG_READY ${TOTAL_MODULES} $MSG_MODULES${NC}"
+    read -p "$MSG_CONTINUE " -n 1 -r
     echo
     
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
-        print_warning "Installation cancelled by user."
-        exit 0
+    if [[ "$DOTFILES_LANG" == "es" ]]; then
+        if [[ ! $REPLY =~ ^[SsYy]$ ]] && [[ -n $REPLY ]]; then
+            print_warning "$MSG_CANCELLED"
+            exit 0
+        fi
+    else
+        if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
+            print_warning "$MSG_CANCELLED"
+            exit 0
+        fi
     fi
     
-    # Execute each module
     for module in "${MODULES_TO_INSTALL[@]}"; do
-        execute_module "$module" || true  # Continue even if module fails
+        execute_module "$module" || true
     done
     
-    # Apply stow for symlinking
     apply_stow
     
-    # Print summary
     print_summary
     exit_code=$?
     
