@@ -1,21 +1,10 @@
 # Arch Linux Dotfiles - Automated Installation Framework
 
-<div align="center">
-
-```
-╔════════════════════════════════════════════════════════╗
-║  Arch Linux Dotfiles - Master Installer               ║
-║  Lenovo LOQ • AMD Ryzen 5 7000 • RTX 3050             ║
-╚════════════════════════════════════════════════════════╝
-```
-
 **Fully automated, modular dotfiles restoration for Arch Linux + KDE Plasma 6 (Wayland)**
-
-</div>
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 dotfiles-ArchLinux/
@@ -26,6 +15,14 @@ dotfiles-ArchLinux/
     │
     ├── secureboot/                     # Secure Boot automation
     │   └── setup.sh                    # sbctl + kernel/Nvidia signing
+    │
+    ├── shell/                          # Zsh configuration
+    │   ├── setup.sh                    # Oh My Zsh + Powerlevel10k
+    │   ├── .zshrc                      # Zsh config (copy yours here)
+    │   └── .p10k.zsh                   # Powerlevel10k config
+    │
+    ├── system/                         # System optimizations
+    │   └── setup.sh                    # Nvidia Wayland env vars + gamemode
     │
     ├── visuals/                        # Visual customization
     │   ├── setup.sh                    # Fastfetch + Terminal + KDE
@@ -40,7 +37,6 @@ dotfiles-ArchLinux/
     │   ├── kde-configs/                # KDE Plasma backups
     │   │   └── konsave-profile.knsv   # Konsave export
     │   └── wallpapers/                 # Wallpaper images
-    │       └── default.jpg
     │
     └── spotify/                        # Spotify + Spicetify
         ├── setup.sh                    # Native Spotify + CLI install
@@ -50,7 +46,7 @@ dotfiles-ArchLinux/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone Repository
 
@@ -59,7 +55,26 @@ git clone <your-repo-url> ~/Documents/dotfiles-ArchLinux
 cd ~/Documents/dotfiles-ArchLinux
 ```
 
-### 2. Run Master Installer
+### 2. Copy Your Personal Configs
+
+**Important:** Before running the installer, copy your current configs:
+
+```bash
+# Shell configs
+cp ~/.zshrc modules/shell/
+cp ~/.p10k.zsh modules/shell/
+
+# Add your wallpapers
+cp ~/Pictures/wallpapers/* modules/visuals/wallpapers/
+
+# Optional: Backup KDE settings
+pip install konsave --user
+konsave -s current
+konsave -e current
+mv ~/.config/konsave/profiles/current.knsv modules/visuals/kde-configs/
+```
+
+### 3. Run Master Installer
 
 ```bash
 chmod +x install.sh
@@ -67,24 +82,30 @@ chmod +x install.sh
 ```
 
 The script will:
-- ✅ Auto-detect all modules
-- ✅ Show progress bars with colors
-- ✅ Install each module sequentially
-- ✅ Symlink configs using GNU Stow
-- ✅ Provide detailed summary
+- Auto-detect all modules
+- Show progress bars with colors
+- Install each module sequentially
+- Symlink configs using GNU Stow
+- Provide detailed summary
+
+### 4. Reboot
+
+```bash
+reboot
+```
+
+After reboot, enable Secure Boot in BIOS if desired.
 
 ---
 
-## 🧩 Module Breakdown
+## Module Breakdown
 
-### 1️⃣ **Secure Boot Module** (`modules/secureboot/`)
+### 1. Secure Boot Module (`modules/secureboot/`)
 
 **What it does:**
 - Installs and configures `sbctl`
 - Creates and enrolls Secure Boot keys
-- Signs kernel (`vmlinuz-linux`, `vmlinuz-linux-lts`)
-- Signs Nvidia modules (`nvidia.ko`, `nvidia-drm.ko`, etc.)
-- Signs bootloader (systemd-boot or others)
+- Signs kernel, Nvidia modules, and bootloader
 - Creates pacman hooks for automatic re-signing on updates
 
 **Critical for:**
@@ -93,16 +114,46 @@ The script will:
 
 **Post-installation:**
 ```bash
-# Verify setup
 sudo sbctl status
 sudo sbctl list-files
-
-# Reboot to enable Secure Boot in BIOS
 ```
 
 ---
 
-### 2️⃣ **Visuals Module** (`modules/visuals/`)
+### 2. Shell Module (`modules/shell/`)
+
+**What it does:**
+- Installs Zsh + JetBrains Mono Nerd Font
+- Changes default shell to Zsh
+- Installs Oh My Zsh
+- Installs plugins: zsh-autosuggestions, zsh-syntax-highlighting
+- Installs Powerlevel10k theme
+
+**Important:**
+Copy your personal configs to the module:
+```bash
+cp ~/.zshrc ~/Documents/dotfiles-ArchLinux/modules/shell/
+cp ~/.p10k.zsh ~/Documents/dotfiles-ArchLinux/modules/shell/
+```
+
+---
+
+### 3. System Module (`modules/system/`)
+
+**What it does:**
+- Configures Nvidia Wayland environment variables
+- Enables proper GBM backend for Nvidia
+- Fixes Electron apps (VS Code, Discord, Spotify) on Wayland
+- Enables Firefox Wayland mode
+- Installs gamemode for gaming performance
+
+**Creates:** `/etc/profile.d/nvidia-wayland.sh`
+
+**Post-installation:** Reboot to apply environment variables
+
+---
+
+### 4. Visuals Module (`modules/visuals/`)
 
 **What it does:**
 - Installs **Fastfetch** with custom config
@@ -114,35 +165,28 @@ sudo sbctl list-files
 
 **Included configs:**
 - `fastfetch/config.jsonc` - System info display
-- `kitty/kitty.conf` - Terminal theme (Catppuccin Mocha)
+- `kitty/kitty.conf` - Terminal theme
 - `kde-configs/` - Full KDE Plasma backup
 
 **To backup your current KDE setup:**
 ```bash
-# Install konsave
 pip install konsave --user
-
-# Create backup
 konsave -s mysetup
-
-# Export profile
 konsave -e mysetup
-
-# Move to dotfiles
 mv ~/.config/konsave/profiles/mysetup.knsv \
-   ~/Documents/dotfiles-ArchLinux/modules/visuals/kde-configs/konsave-profile.knsv
+   ~/Documents/dotfiles-ArchLinux/modules/visuals/kde-configs/
 ```
 
 ---
 
-### 3️⃣ **Spotify Module** (`modules/spotify/`)
+### 5. Spotify Module (`modules/spotify/`)
 
 **What it does:**
 - Installs **Spotify** from AUR (native, not Flatpak)
 - Fixes `/opt/spotify` permissions (critical for Spicetify)
 - Installs **Spicetify CLI** from AUR
 - Installs **Spicetify Marketplace**
-- Applies theme (Catppuccin by default)
+- Applies theme
 - Creates restore script for Spotify updates
 
 **Why native installation?**
@@ -158,37 +202,38 @@ cd ~/Documents/dotfiles-ArchLinux/modules/spotify
 
 ---
 
-## 🛠️ Customization Guide
+## Customization Guide
 
 ### Adding Your Own Configs
 
-**Example: Adding Zsh config**
+The modular structure makes it easy to add any configuration.
+
+**Example: Adding Git config**
 
 1. Create module structure:
 ```bash
-mkdir -p modules/shell/.config/zsh
+mkdir -p modules/git
 ```
 
 2. Add your config files:
 ```bash
-cp ~/.zshrc modules/shell/.config/zsh/
-cp -r ~/.oh-my-zsh modules/shell/.config/zsh/
+cp ~/.gitconfig modules/git/
 ```
 
-3. Create `modules/shell/setup.sh`:
+3. Create `modules/git/setup.sh`:
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Installing Zsh..."
-sudo pacman -S --needed --noconfirm zsh
+echo "Installing Git..."
+sudo pacman -S --needed --noconfirm git
 
-echo "Zsh module completed!"
+echo "Git module completed"
 ```
 
 4. Make executable:
 ```bash
-chmod +x modules/shell/setup.sh
+chmod +x modules/git/setup.sh
 ```
 
 5. Run master installer:
@@ -225,11 +270,11 @@ stow -v -t $HOME visuals
 
 ---
 
-## 🔧 System Requirements
+## System Requirements
 
 **Hardware:**
 - CPU: AMD Ryzen 5 7000 Series
-- GPU: Nvidia RTX 3050 6GB
+- GPU: Nvidia RTX 3050 6GB (Hybrid Graphics)
 - RAM: 12GB
 
 **Software:**
@@ -247,7 +292,7 @@ stow -v -t $HOME visuals
 
 ---
 
-## 📋 Usage Examples
+## Usage Examples
 
 ### Install Everything
 ```bash
@@ -274,16 +319,21 @@ stow -n -v -t $HOME visuals
 
 ---
 
-## ⚠️ Important Notes
+## Important Notes
 
 ### Secure Boot
-- **Reboot required** after secure boot setup
+- Reboot required after secure boot setup
 - Enable Secure Boot in BIOS/UEFI after first boot
 - If boot fails, disable Secure Boot and run `sudo sbctl verify`
 
-### Nvidia Drivers
+### Nvidia Drivers + Wayland
+- System module configures critical environment variables
 - Modules auto-signed on kernel updates via pacman hooks
-- If Nvidia fails to load: `sudo sbctl sign-all && sudo update-initramfs -u`
+- If Nvidia fails to load: `sudo sbctl sign-all`
+
+### Shell (Zsh)
+- Shell change requires re-login to take effect
+- Run `p10k configure` to customize Powerlevel10k after first login
 
 ### KDE Plasma
 - Some settings require re-login to apply
@@ -297,7 +347,7 @@ stow -n -v -t $HOME visuals
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Issue: "Module failed" error
 **Solution:**
@@ -345,7 +395,7 @@ spicetify backup apply
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Arch Wiki - Secure Boot](https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface/Secure_Boot)
 - [sbctl Documentation](https://github.com/Foxboron/sbctl)
@@ -353,35 +403,14 @@ spicetify backup apply
 - [GNU Stow Manual](https://www.gnu.org/software/stow/manual/stow.html)
 - [Konsave GitHub](https://github.com/Prayag2/konsave)
 - [Fastfetch](https://github.com/fastfetch-cli/fastfetch)
+- [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
 ---
 
-## 📝 To-Do
-
-- [ ] Add Neovim/Vim configuration module
-- [ ] Add Hyprland/i3 window manager configs
-- [ ] Create automated backup script (`backup.sh`)
-- [ ] Add Firefox CSS customization module
-- [ ] Integrate GTK theme installation
-
----
-
-## 🤝 Contributing
-
-This is a personal dotfiles repository, but feel free to fork and adapt for your own setup!
-
----
-
-## 📄 License
+## License
 
 MIT License - Do whatever you want with this code.
 
 ---
 
-<div align="center">
-
-**Made with ❤️ for Arch Linux**
-
-*"I use Arch, btw"*
-
-</div>
+**Made for Arch Linux | Lenovo LOQ | RTX 3050**

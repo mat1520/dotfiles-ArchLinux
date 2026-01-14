@@ -28,10 +28,10 @@ FAILED_MODULES=()
 # ========== Helper Functions ==========
 
 print_header() {
-    echo -e "\n${BOLD}${CYAN}╔════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BOLD}${CYAN}║${NC}  ${MAGENTA}Arch Linux Dotfiles - Master Installer${NC}            ${CYAN}║${NC}"
-    echo -e "${BOLD}${CYAN}║${NC}  ${YELLOW}Lenovo LOQ • AMD Ryzen 5 7000 • RTX 3050${NC}          ${CYAN}║${NC}"
-    echo -e "${BOLD}${CYAN}╚════════════════════════════════════════════════════════╝${NC}\n"
+    echo -e "\n${BOLD}${CYAN}========================================${NC}"
+    echo -e "${BOLD}${MAGENTA}Arch Linux Dotfiles - Master Installer${NC}"
+    echo -e "${BOLD}${YELLOW}Lenovo LOQ - AMD Ryzen 5 7000 - RTX 3050${NC}"
+    echo -e "${BOLD}${CYAN}========================================${NC}\n"
 }
 
 print_section() {
@@ -140,9 +140,7 @@ execute_module() {
     
     CURRENT_MODULE=$((CURRENT_MODULE + 1))
     
-    echo -e "\n${BOLD}${MAGENTA}╭─────────────────────────────────────╮${NC}"
-    echo -e "${BOLD}${MAGENTA}│${NC} Module ${CURRENT_MODULE}/${TOTAL_MODULES}: ${BOLD}${module_name}${NC}"
-    echo -e "${BOLD}${MAGENTA}╰─────────────────────────────────────╯${NC}\n"
+    echo -e "\n${BOLD}${MAGENTA}--- Module ${CURRENT_MODULE}/${TOTAL_MODULES}: ${module_name} ---${NC}\n"
     
     progress_bar $CURRENT_MODULE $TOTAL_MODULES
     
