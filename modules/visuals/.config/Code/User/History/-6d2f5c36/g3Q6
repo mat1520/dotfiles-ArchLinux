@@ -1,0 +1,40 @@
+# Dotfiles Installer - .gitignore
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.*.swp
+.*.swo
+
+# Logs
+*.log
+
+# Sensitive data
+*.key
+*.pem
+*.crt
+
+# Personal data that shouldn't be committed
+modules/*/kde-configs/*.knsv
+modules/*/wallpapers/*.jpg
+modules/*/wallpapers/*.png
+
+# Compiled Python
+__pycache__/
+*.py[cod]
+
+# Node modules (if you add JS configs)
+node_modules/
+
+# Environment files
+.env
+.env.local

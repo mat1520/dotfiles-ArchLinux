@@ -1,0 +1,18 @@
+{
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "workbench.colorTheme": "Catppuccin Dark Pro",
+    "settingsSync.ignoredSettings": [
+
+    ],
+
+    "window.titleBarStyle": "native",
+    "apc.electron": {
+        "window.frame": false,
+        "backgroundColor": "#00000000",
+        "visualEffectState": "active"
+    },
+    "apc.stylesheet": {
+        ".monaco-editor": "background-color: rgba(0, 0, 0, 0.6) !important;", 
+        ".monaco-workbench": "background-color: transparent !important;"
+    }
+}

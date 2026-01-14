@@ -1,0 +1,12 @@
+# Custom Spicetify Themes
+# 
+# Place your custom Spicetify themes here
+# Each theme should be in its own directory
+#
+# Example structure:
+# spicetify-themes/
+# └── mytheme/
+#     ├── color.ini
+#     └── user.css
+#
+# The setup script will automatically copy these to ~/.config/spicetify/Themes/

@@ -1,0 +1,9 @@
+# KDE Configuration Backups
+# 
+# To create a backup:
+# 1. Install konsave: pip install konsave --user
+# 2. Save profile: konsave -s myprofile
+# 3. Export: konsave -e myprofile
+# 4. Move the .knsv file here
+#
+# Or manually copy ~/.config/plasma* and kwin* files here
