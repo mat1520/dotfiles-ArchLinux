@@ -1,0 +1,66 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": "/home/mat/Downloads/fastfetch.jpg",
+        "type": "kitty",
+        "height": 16, // Altura de la imagen
+        "padding": {
+            "top": 2,
+            "left": 2
+        }
+    },
+    "display": {
+        "separator": " ⟫  "
+    },
+    "modules": [
+        // Ajustamos los breaks iniciales para centrar verticalmente el bloque respecto a la imagen
+        "break",
+        "break",
+        "break",
+        "break",
+        {
+            "type": "custom",
+            "format": "\u001b[38;2;160;117;188m┌──────────────────────────────────────────┐\u001b[0m"
+        },
+        {
+            "type": "os",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m OS    ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "kernel",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m KRN   ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "packages",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m PKG   ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "wm",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m WM    ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "shell",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m SH    ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "uptime",
+            "key": "\u001b[38;2;160;117;188m   \u001b[0m UPT   ",
+            "keyColor": "38;2;160;117;188"
+        },
+        {
+            "type": "custom",
+            "format": "\u001b[38;2;160;117;188m└──────────────────────────────────────────┘\u001b[0m"
+        },
+        "break",
+        // Barras estilo Catppuccin Mocha
+        {
+            "type": "custom",
+            "format": "\u001b[38;2;160;117;188m▀▀▀▀▀ \u001b[38;2;203;166;247m▀▀▀▀▀ \u001b[38;2;180;190;254m▀▀▀▀▀ \u001b[38;2;137;180;250m▀▀▀▀▀ \u001b[38;2;148;226;213m▀▀▀▀▀"
+        }
+    ]
+}
