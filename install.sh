@@ -39,19 +39,19 @@ print_section() {
 }
 
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo -e "${GREEN}[OK]${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
 print_info() {
-    echo -e "${CYAN}ℹ${NC} $1"
+    echo -e "${CYAN}[INFO]${NC} $1"
 }
 
 progress_bar() {
@@ -201,19 +201,17 @@ print_summary() {
     if [[ ${#FAILED_MODULES[@]} -gt 0 ]]; then
         echo -e "\n${RED}${BOLD}Failed Modules:${NC}"
         for module in "${FAILED_MODULES[@]}"; do
-            echo -e "  ${RED}✗${NC} ${module}"
+            echo -e "  ${RED}[FAILED]${NC} ${module}"
         done
         echo -e "\n${YELLOW}Please check the error messages above and retry.${NC}"
         return 1
     else
-        echo -e "\n${GREEN}${BOLD}╔════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}${BOLD}║  ✓ All modules installed successfully! ║${NC}"
-        echo -e "${GREEN}${BOLD}╚════════════════════════════════════════╝${NC}\n"
+        echo -e "\n${GREEN}${BOLD}All modules installed successfully!${NC}\n"
         
         print_info "You may need to:"
-        echo -e "  • Reboot to apply Secure Boot changes"
-        echo -e "  • Re-login to apply shell/KDE settings"
-        echo -e "  • Run ${BOLD}plasma-apply-*${NC} commands manually if needed"
+        echo -e "  - Reboot to apply Secure Boot changes"
+        echo -e "  - Re-login to apply shell/KDE settings"
+        echo -e "  - Run ${BOLD}plasma-apply-*${NC} commands manually if needed"
         return 0
     fi
 }
