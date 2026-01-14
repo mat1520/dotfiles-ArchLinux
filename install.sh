@@ -1,12 +1,97 @@
 #!/usr/bin/env bash
 # ========================================
 # Arch Linux Dotfiles - Master Installer
+# Instalador Maestro de Dotfiles Arch Linux
 # ========================================
 # Automated dotfiles restoration for Lenovo LOQ
+# Restauracion automatizada de dotfiles para Lenovo LOQ
 # KDE Plasma 6 (Wayland) + Zsh + Nvidia RTX 3050
 # ========================================
 
 set -euo pipefail
+
+# ========== Language Selection / Seleccion de Idioma ==========
+export DOTFILES_LANG="${DOTFILES_LANG:-es}"
+
+if [[ "$DOTFILES_LANG" == "es" ]]; then
+    HEADER_TITLE="Arch Linux Dotfiles - Instalador Maestro"
+    HEADER_SYSTEM="Lenovo LOQ - AMD Ryzen 5 7000 - RTX 3050 6GB"
+    MSG_CHECK_ROOT="Este script NO debe ejecutarse como root!"
+    MSG_NEED_SUDO="Se solicitara sudo cuando sea necesario."
+    MSG_CHECK_DEPS="Verificando Dependencias"
+    MSG_INSTALLED="esta instalado"
+    MSG_NOT_INSTALLED="NO esta instalado"
+    MSG_INSTALLING="Instalando dependencias faltantes:"
+    MSG_DISCOVER="Descubriendo Modulos"
+    MSG_NOT_FOUND="Directorio de modulos no encontrado:"
+    MSG_FOUND="Encontrado modulo:"
+    MSG_SKIPPING="Omitiendo"
+    MSG_NO_SETUP="(no se encontro setup.sh)"
+    MSG_NO_MODULES="No se encontraron modulos!"
+    MSG_TOTAL="Total de modulos a instalar:"
+    MSG_MODULE="Modulo"
+    MSG_SETUP_NOT_FOUND="Script de instalacion no encontrado:"
+    MSG_COMPLETED="completado exitosamente"
+    MSG_FAILED="fallo!"
+    MSG_STOW="Aplicando GNU Stow"
+    MSG_STOWING="Aplicando stow a"
+    MSG_SYMLINKED="enlazado simbolicamente"
+    MSG_CONFLICTS="puede tener conflictos"
+    MSG_SUMMARY="Resumen de Instalacion"
+    MSG_PROCESSED="Modulos Procesados:"
+    MSG_SUCCESSFUL="Exitosos:"
+    MSG_FAILED_LIST="Fallidos:"
+    MSG_FAILED_MODULES="Modulos Fallidos:"
+    MSG_CHECK_ERRORS="Por favor revisa los errores arriba y reintenta."
+    MSG_ALL_SUCCESS="Todos los modulos instalados exitosamente!"
+    MSG_NEED_TO="Puede que necesites:"
+    MSG_REBOOT="Reiniciar para aplicar cambios de Secure Boot"
+    MSG_RELOGIN="Volver a iniciar sesion para aplicar configuracion de shell/KDE"
+    MSG_PLASMA="Ejecutar comandos plasma-apply-* manualmente si es necesario"
+    MSG_READY="Listo para instalar"
+    MSG_MODULES="modulo(s)."
+    MSG_CONTINUE="Continuar? [S/n]"
+    MSG_CANCELLED="Instalacion cancelada por el usuario."
+else
+    HEADER_TITLE="Arch Linux Dotfiles - Master Installer"
+    HEADER_SYSTEM="Lenovo LOQ - AMD Ryzen 5 7000 - RTX 3050 6GB"
+    MSG_CHECK_ROOT="This script should NOT be run as root!"
+    MSG_NEED_SUDO="It will request sudo when needed."
+    MSG_CHECK_DEPS="Checking Dependencies"
+    MSG_INSTALLED="is installed"
+    MSG_NOT_INSTALLED="is NOT installed"
+    MSG_INSTALLING="Installing missing dependencies:"
+    MSG_DISCOVER="Discovering Modules"
+    MSG_NOT_FOUND="Modules directory not found:"
+    MSG_FOUND="Found module:"
+    MSG_SKIPPING="Skipping"
+    MSG_NO_SETUP="(no setup.sh found)"
+    MSG_NO_MODULES="No modules found!"
+    MSG_TOTAL="Total modules to install:"
+    MSG_MODULE="Module"
+    MSG_SETUP_NOT_FOUND="Setup script not found:"
+    MSG_COMPLETED="completed successfully"
+    MSG_FAILED="failed!"
+    MSG_STOW="Applying GNU Stow"
+    MSG_STOWING="Stowing"
+    MSG_SYMLINKED="symlinked"
+    MSG_CONFLICTS="may have conflicts"
+    MSG_SUMMARY="Installation Summary"
+    MSG_PROCESSED="Modules Processed:"
+    MSG_SUCCESSFUL="Successful:"
+    MSG_FAILED_LIST="Failed:"
+    MSG_FAILED_MODULES="Failed Modules:"
+    MSG_CHECK_ERRORS="Please check the error messages above and retry."
+    MSG_ALL_SUCCESS="All modules installed successfully!"
+    MSG_NEED_TO="You may need to:"
+    MSG_REBOOT="Reboot to apply Secure Boot changes"
+    MSG_RELOGIN="Re-login to apply shell/KDE settings"
+    MSG_PLASMA="Run plasma-apply-* commands manually if needed"
+    MSG_READY="Ready to install"
+    MSG_MODULES="module(s)."
+    MSG_CONTINUE="Continue? [Y/n]"
+    MSG_CANCELLED="Installation cancelled by user."
+fi
 
 # ========== Color Definitions ==========
 readonly RED='\033[0;31m'
@@ -16,7 +101,7 @@ readonly BLUE='\033[0;34m'
 readonly MAGENTA='\033[0;35m'
 readonly CYAN='\033[0;36m'
 readonly BOLD='\033[1m'
-readonly NC='\033[0m' # No Color
+readonly NC='\033[0m'
 
 # ========== Script Variables ==========
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,8 +114,8 @@ FAILED_MODULES=()
 
 print_header() {
     echo -e "\n${BOLD}${CYAN}========================================${NC}"
-    echo -e "${BOLD}${MAGENTA}Arch Linux Dotfiles - Master Installer${NC}"
-    echo -e "${BOLD}${YELLOW}Lenovo LOQ - AMD Ryzen 5 7000 - RTX 3050${NC}"
+    echo -e "${BOLD}${MAGENTA}$HEADER_TITLE${NC}"
+    echo -e "${BOLD}${YELLOW}$HEADER_SYSTEM${NC}"
     echo -e "${BOLD}${CYAN}========================================${NC}\n"
 }
 
@@ -74,38 +159,38 @@ progress_bar() {
 
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        print_error "This script should NOT be run as root!"
-        print_info "It will request sudo when needed."
+        print_error "$MSG_CHECK_ROOT"
+        print_info "$MSG_NEED_SUDO"
         exit 1
     fi
 }
 
 check_dependencies() {
-    print_section "Checking Dependencies"
+    print_section "$MSG_CHECK_DEPS"
     
     local deps=("git" "stow" "sudo")
     local missing_deps=()
     
     for dep in "${deps[@]}"; do
         if command -v "$dep" &> /dev/null; then
-            print_success "$dep is installed"
+            print_success "$dep $MSG_INSTALLED"
         else
-            print_error "$dep is NOT installed"
+            print_error "$dep $MSG_NOT_INSTALLED"
             missing_deps+=("$dep")
         fi
     done
     
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
-        print_warning "Installing missing dependencies: ${missing_deps[*]}"
+        print_warning "$MSG_INSTALLING ${missing_deps[*]}"
         sudo pacman -S --needed --noconfirm "${missing_deps[@]}"
     fi
 }
 
 discover_modules() {
-    print_section "Discovering Modules"
+    print_section "$MSG_DISCOVER"
     
     if [[ ! -d "${MODULES_DIR}" ]]; then
-        print_error "Modules directory not found: ${MODULES_DIR}"
+        print_error "$MSG_NOT_FOUND ${MODULES_DIR}"
         exit 1
     fi
     
@@ -114,22 +199,21 @@ discover_modules() {
         local module_name=$(basename "$module_dir")
         if [[ -f "${module_dir}/setup.sh" ]]; then
             modules+=("$module_name")
-            print_info "Found module: ${BOLD}${module_name}${NC}"
+            print_info "$MSG_FOUND ${BOLD}${module_name}${NC}"
         else
-            print_warning "Skipping ${module_name} (no setup.sh found)"
+            print_warning "$MSG_SKIPPING ${module_name} $MSG_NO_SETUP"
         fi
     done < <(find "${MODULES_DIR}" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
     
     TOTAL_MODULES=${#modules[@]}
     
     if [[ $TOTAL_MODULES -eq 0 ]]; then
-        print_error "No modules found!"
+        print_error "$MSG_NO_MODULES"
         exit 1
     fi
     
-    echo -e "\n${BOLD}${GREEN}Total modules to install: ${TOTAL_MODULES}${NC}\n"
+    echo -e "\n${BOLD}${GREEN}$MSG_TOTAL ${TOTAL_MODULES}${NC}\n"
     
-    # Return modules array
     printf '%s\n' "${modules[@]}"
 }
 
